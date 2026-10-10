@@ -1,0 +1,74 @@
+[
+  {
+    "id": "windbell",
+    "meshes": 5,
+    "triangles": 6248,
+    "source": "Original Blender profile/sweep/detail modeling for this game"
+  },
+  {
+    "id": "bamboo",
+    "meshes": 5,
+    "triangles": 11308,
+    "source": "Original Blender profile/sweep/detail modeling for this game"
+  },
+  {
+    "id": "dew",
+    "meshes": 5,
+    "triangles": 4520,
+    "source": "Original Blender profile/sweep/detail modeling for this game"
+  },
+  {
+    "id": "silk",
+    "meshes": 5,
+    "triangles": 3680,
+    "source": "Original Blender profile/sweep/detail modeling for this game"
+  },
+  {
+    "id": "coal",
+    "meshes": 5,
+    "triangles": 7784,
+    "source": "Original Blender profile/sweep/detail modeling for this game"
+  },
+  {
+    "id": "anvil",
+    "meshes": 4,
+    "triangles": 2924,
+    "source": "Original Blender profile/sweep/detail modeling for this game"
+  },
+  {
+    "id": "crucible",
+    "meshes": 5,
+    "triangles": 7784,
+    "source": "Original Blender profile/sweep/detail modeling for this game"
+  },
+  {
+    "id": "ember",
+    "meshes": 5,
+    "triangles": 4192,
+    "source": "Original Blender profile/sweep/detail modeling for this game"
+  },
+  {
+    "id": "redthread",
+    "meshes": 5,
+    "triangles": 9952,
+    "source": "Original Blender profile/sweep/detail modeling for this game"
+  },
+  {
+    "id": "teacup",
+    "meshes": 5,
+    "triangles": 4800,
+    "source": "Original Blender profile/sweep/detail modeling for this game"
+  },
+  {
+    "id": "chorus",
+    "meshes": 5,
+    "triangles": 10096,
+    "source": "Original Blender profile/sweep/detail modeling for this game"
+  },
+  {
+    "id": "fellow",
+    "meshes": 5,
+    "triangles": 6176,
+    "source": "Original Blender profile/sweep/detail modeling for this game"
+  }
+]

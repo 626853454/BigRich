@@ -1,0 +1,21 @@
+百番夜宴新增资源 / 2026-10-09
+本轮原创：12款雀灵挂件、河牌灯/门神印/门神架、瓷质计分筹码，共16种模型；配方为build_night_relics.py、build_night_fixtures.py、build_score_chips.py。图标来自这些模型的实际Blender渲染。
+可编辑源：night_relics_studio.blend、night_table_fixtures.blend、night_score_token.blend。
+角色派生：nemo_table_contact_rig.blend、bear_table_contact_rig.blend及对应GLB，基于此前已认可角色与茶会模型增加12骨骼蒙皮/桌边接触。基础模型、贴图属于Party Animals/Recreate Games，社区FurryModels分发。商业分发许可未证实。此改造不改变既有来源与许可状态，不能称角色原创或官方开源。
+音效：make_night_audio.py合成本轮封顶分层短音，原游戏音频与许可证保留。
+旧资源/头像/已完成柯基/既有交付未覆盖；本轮表层/骨骼修改使用独立资源。
+技术：Godot ImporterMesh LOD、Skeleton3D及Blender Armature官方资料；批材质按本机Godot ed1daf0bf shader_types.cpp，使用CLEARCOAT_ROUGHNESS。自制合批资源保留未批原GLB及配方，可再编辑。
+
+本轮新增资源 / 2026-10-09 核心玩法与视听
+原创建模：莲瓣灵感灯、独立火珠、曲面瓷质加演书与朱砂双印，Blender源与配方随包；赤封图标为本轮实际朱砂印章的Cycles透明渲染。
+原创程序视听：真实实体计分姿态/重计、挂件短带、印章蜡光、因果热量显示、计分聚焦UI、桌面灯光。固定池/实例化并保留编辑源。
+原创音频：make_show_audio.py生成17短音＋2同步PCM音乐；make_route_audio.py添加5路线/茶具音；make_encore_audio.py添加2加演音；make_furnace_audio.py添加1炉温音；make_breakthrough_audio.py添加1过线音。共26短音＋2音乐，无外部采样。
+录音仅自身Godot Master总线，无麦克风或系统输入。音频文件头/峰值/音轨存在验证不代表人类听感认可。
+旧12挂件/河牌灯/门神/筹码及2角色接触骨骼源照原来源保留，相关脚本/Blender文件随编辑包。
+基础角色Party Animals/Recreate Games社区FurryModels商业分发许可未证实；新增骨骼/动画不能改变基础资产许可。旧头像/完成柯基/旧交付保持。
+
+本轮新增 / 2026-10-10 借形连响
+真实实体牌的双轨拆换、双臂骨骼姿态、第二组集中展牌与归位均为程序驱动已有实体网格；未新增角色、牌桌或独立Blender模型。不将8份继承的Blender源称本轮新建。
+make_reshape_audio.py独立生成reshape_open/reshape_land；make_chain_audio.py独立生成chain_land。确定性瓷音模态与滤波噪声，无外部采样。旧26短音＋2音乐保留，合计29短音＋2音乐。
+录音只来自自身Godot Master总线，不使用麦克风或系统输入。波形/轨道验证不等于人类听感认证。
+原有社区角色来源及商业许可不确定性保持，未新增下载资产。用户已认可角色/头像/柯基和旧交付不改。

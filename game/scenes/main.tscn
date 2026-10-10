@@ -1,0 +1,46 @@
+[gd_scene load_steps=7 format=3]
+
+[ext_resource type="Script" path="res://scripts/main.gd" id="1_main"]
+[ext_resource type="Script" path="res://scripts/world/town_world.gd" id="2_world"]
+[ext_resource type="Script" path="res://scripts/world/fixed_overhead_camera.gd" id="3_camera"]
+
+[sub_resource type="Environment" id="Environment_night"]
+background_mode = 1
+background_color = Color(0.025, 0.038, 0.043, 1)
+ambient_light_source = 3
+ambient_light_color = Color(0.25, 0.34, 0.39, 1)
+ambient_light_energy = 0.48
+fog_enabled = true
+fog_light_color = Color(0.08, 0.12, 0.13, 1)
+fog_density = 0.009
+
+[sub_resource type="SphereMesh" id="Sphere_sky"]
+radius = 0.2
+height = 0.4
+
+[sub_resource type="StandardMaterial3D" id="Material_sky"]
+albedo_color = Color(0.08, 0.11, 0.12, 1)
+
+[node name="Main" type="Node3D"]
+script = ExtResource("1_main")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_night")
+
+[node name="Moonlight" type="DirectionalLight3D" parent="."]
+rotation_degrees = Vector3(-52, -35, 0)
+light_color = Color(0.39, 0.52, 0.58, 1)
+light_energy = 0.65
+shadow_enabled = true
+
+[node name="World" type="Node3D" parent="."]
+script = ExtResource("2_world")
+
+[node name="Camera" type="Camera3D" parent="."]
+script = ExtResource("3_camera")
+
+[node name="SkyMarker" type="MeshInstance3D" parent="."]
+position = Vector3(0, 8, 0)
+mesh = SubResource("Sphere_sky")
+material_override = SubResource("Material_sky")
+visible = false

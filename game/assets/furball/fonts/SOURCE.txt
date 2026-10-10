@@ -1,0 +1,5 @@
+Unmodified Noto Sans CJK Regular.woff2 from Blender 4.5.14 LTS distribution.
+Copyright and OFL attribution: Blender license/license.md, Fonts section.
+https://github.com/blender/blender/blob/main/release/license/license.md
+https://github.com/notofonts/noto-cjk
+No font designs or internal names were changed.

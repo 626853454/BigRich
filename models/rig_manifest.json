@@ -1,0 +1,350 @@
+[
+  {
+    "character": "nemo",
+    "bones": {
+      "Root": {
+        "head": [
+          0,
+          0,
+          0
+        ],
+        "tail": [
+          0,
+          0.3,
+          0
+        ],
+        "parent": null
+      },
+      "Head": {
+        "head": [
+          0,
+          1.55,
+          0
+        ],
+        "tail": [
+          0,
+          2.18,
+          0
+        ],
+        "parent": "Root"
+      },
+      "Leg.R": {
+        "head": [
+          0.25,
+          0.38,
+          0
+        ],
+        "tail": [
+          0.33,
+          0.03,
+          0.1
+        ],
+        "parent": "Root"
+      },
+      "Leg.L": {
+        "head": [
+          -0.25,
+          0.38,
+          0
+        ],
+        "tail": [
+          -0.33,
+          0.03,
+          0.1
+        ],
+        "parent": "Root"
+      },
+      "Upper.R": {
+        "head": [
+          0.4,
+          1.35,
+          0
+        ],
+        "tail": [
+          0.62,
+          0.92,
+          0.01
+        ],
+        "parent": "Root"
+      },
+      "Lower.R": {
+        "head": [
+          0.62,
+          0.92,
+          0.01
+        ],
+        "tail": [
+          0.725102424621582,
+          0.47555426359176634,
+          0.06610548853874207
+        ],
+        "parent": "Upper.R"
+      },
+      "Paw.R": {
+        "head": [
+          0.725102424621582,
+          0.47555426359176634,
+          0.06610548853874207
+        ],
+        "tail": [
+          0.725102424621582,
+          0.37555426359176636,
+          0.15610548853874207
+        ],
+        "parent": "Lower.R"
+      },
+      "Contact.R": {
+        "head": [
+          0.725102424621582,
+          0.37555426359176636,
+          0.15610548853874207
+        ],
+        "tail": [
+          0.725102424621582,
+          0.37555426359176636,
+          0.25610548853874204
+        ],
+        "parent": "Paw.R"
+      },
+      "Upper.L": {
+        "head": [
+          -0.4,
+          1.35,
+          0
+        ],
+        "tail": [
+          -0.62,
+          0.92,
+          0.01
+        ],
+        "parent": "Root"
+      },
+      "Lower.L": {
+        "head": [
+          -0.62,
+          0.92,
+          0.01
+        ],
+        "tail": [
+          -0.7257640361785889,
+          0.47474307417869566,
+          0.06682296454906464
+        ],
+        "parent": "Upper.L"
+      },
+      "Paw.L": {
+        "head": [
+          -0.7257640361785889,
+          0.47474307417869566,
+          0.06682296454906464
+        ],
+        "tail": [
+          -0.7257640361785889,
+          0.3747430741786957,
+          0.15682296454906464
+        ],
+        "parent": "Lower.L"
+      },
+      "Contact.L": {
+        "head": [
+          -0.7257640361785889,
+          0.3747430741786957,
+          0.15682296454906464
+        ],
+        "tail": [
+          -0.7257640361785889,
+          0.3747430741786957,
+          0.2568229645490646
+        ],
+        "parent": "Paw.L"
+      }
+    },
+    "mesh_vertices": {
+      "Body": 22176,
+      "Collar": 2072,
+      "Nemo_Normal": 856,
+      "Small tongue inside smile": 559,
+      "BoundedShellGroom": 17952,
+      "LayeredCurvedGroom": 46008,
+      "Gentle eyebrow tufts": 208
+    },
+    "weighted_vertices": 89831,
+    "max_normalization_error": 2.220446049250313e-16,
+    "source": "table-only rig derived from preserved smoothed weight channels; max four influences per vertex; no old files replaced"
+  },
+  {
+    "character": "bear",
+    "bones": {
+      "Root": {
+        "head": [
+          0,
+          0,
+          0
+        ],
+        "tail": [
+          0,
+          0.3,
+          0
+        ],
+        "parent": null
+      },
+      "Head": {
+        "head": [
+          0,
+          1.55,
+          0
+        ],
+        "tail": [
+          0,
+          2.18,
+          0
+        ],
+        "parent": "Root"
+      },
+      "Leg.R": {
+        "head": [
+          0.25,
+          0.38,
+          0
+        ],
+        "tail": [
+          0.33,
+          0.03,
+          0.1
+        ],
+        "parent": "Root"
+      },
+      "Leg.L": {
+        "head": [
+          -0.25,
+          0.38,
+          0
+        ],
+        "tail": [
+          -0.33,
+          0.03,
+          0.1
+        ],
+        "parent": "Root"
+      },
+      "Upper.R": {
+        "head": [
+          0.4,
+          1.35,
+          0
+        ],
+        "tail": [
+          0.62,
+          0.92,
+          0.01
+        ],
+        "parent": "Root"
+      },
+      "Lower.R": {
+        "head": [
+          0.62,
+          0.92,
+          0.01
+        ],
+        "tail": [
+          0.6700177788734436,
+          0.6711164474487304,
+          0.09572233617305756
+        ],
+        "parent": "Upper.R"
+      },
+      "Paw.R": {
+        "head": [
+          0.6700177788734436,
+          0.6711164474487304,
+          0.09572233617305756
+        ],
+        "tail": [
+          0.6700177788734436,
+          0.5711164474487305,
+          0.18572233617305756
+        ],
+        "parent": "Lower.R"
+      },
+      "Contact.R": {
+        "head": [
+          0.6700177788734436,
+          0.5711164474487305,
+          0.18572233617305756
+        ],
+        "tail": [
+          0.6700177788734436,
+          0.5711164474487305,
+          0.28572233617305753
+        ],
+        "parent": "Paw.R"
+      },
+      "Upper.L": {
+        "head": [
+          -0.4,
+          1.35,
+          0
+        ],
+        "tail": [
+          -0.62,
+          0.92,
+          0.01
+        ],
+        "parent": "Root"
+      },
+      "Lower.L": {
+        "head": [
+          -0.62,
+          0.92,
+          0.01
+        ],
+        "tail": [
+          -0.6700359582901001,
+          0.6690081119537353,
+          0.0957241839170456
+        ],
+        "parent": "Upper.L"
+      },
+      "Paw.L": {
+        "head": [
+          -0.6700359582901001,
+          0.6690081119537353,
+          0.0957241839170456
+        ],
+        "tail": [
+          -0.6700359582901001,
+          0.5690081119537354,
+          0.1857241839170456
+        ],
+        "parent": "Lower.L"
+      },
+      "Contact.L": {
+        "head": [
+          -0.6700359582901001,
+          0.5690081119537354,
+          0.1857241839170456
+        ],
+        "tail": [
+          -0.6700359582901001,
+          0.5690081119537354,
+          0.28572418391704557
+        ],
+        "parent": "Paw.L"
+      }
+    },
+    "mesh_vertices": {
+      "Body": 15835,
+      "BrownBear_Normal": 898,
+      "BoundedShellGroom": 14076,
+      "Soft bear smile left": 539,
+      "Soft bear smile right": 539,
+      "Short bear philtrum": 187,
+      "LayeredCurvedGroom": 54000,
+      "Gentle eyebrow tufts": 208,
+      "Soft nose and inset nostrils": 1223
+    },
+    "weighted_vertices": 87505,
+    "max_normalization_error": 2.220446049250313e-16,
+    "source": "table-only rig derived from preserved smoothed weight channels; max four influences per vertex; no old files replaced"
+  }
+]

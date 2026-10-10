@@ -1,0 +1,14 @@
+[
+  {
+    "file": "reshape_open.wav",
+    "duration": 0.48,
+    "peak": 0.23909666817612818,
+    "source": "Original deterministic porcelain modes + filtered noise, no external samples."
+  },
+  {
+    "file": "reshape_land.wav",
+    "duration": 0.4,
+    "peak": 0.24418912569305473,
+    "source": "Original deterministic porcelain modes + filtered noise, no external samples."
+  }
+]

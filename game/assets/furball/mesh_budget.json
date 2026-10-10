@@ -1,0 +1,42 @@
+{
+  "corgi_plush": {
+    "vertices": 38568,
+    "triangles": 41750,
+    "materials": 6
+  },
+  "popcorn_creature": {
+    "vertices": 1560,
+    "triangles": 3044,
+    "materials": 4
+  },
+  "hat_pot": {
+    "vertices": 554,
+    "triangles": 1092,
+    "materials": 2
+  },
+  "hat_mechanic": {
+    "vertices": 544,
+    "triangles": 1076,
+    "materials": 2
+  },
+  "weapon_blaster": {
+    "vertices": 630,
+    "triangles": 1244,
+    "materials": 5
+  },
+  "weapon_pan": {
+    "vertices": 496,
+    "triangles": 984,
+    "materials": 2
+  },
+  "weapon_cookie": {
+    "vertices": 518,
+    "triangles": 1020,
+    "materials": 2
+  },
+  "popcorn_market": {
+    "vertices": 45274,
+    "triangles": 88692,
+    "materials": 16
+  }
+}

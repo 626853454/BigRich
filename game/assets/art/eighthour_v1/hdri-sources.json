@@ -1,0 +1,28 @@
+[
+  {
+    "asset": "studio_small_09",
+    "page": "https://polyhaven.com/a/studio_small_09",
+    "api": "https://api.polyhaven.com/files/studio_small_09",
+    "file": "studio_small_09_1k.hdr",
+    "url": "https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/studio_small_09_1k.hdr",
+    "bytes": 1615248,
+    "sha256": "e7cfda5f4e98e623db12b8bfd0184e048488e4855d9c83e2751fb44a32e80c45",
+    "license": "CC0",
+    "license_source": "https://polyhaven.com/license",
+    "author": "Sergej Majboroda",
+    "purpose": "Real environment illumination/reflection source for engine art comparison; not a background gameplay screenshot."
+  },
+  {
+    "asset": "kloppenheim_06_puresky",
+    "page": "https://polyhaven.com/a/kloppenheim_06_puresky",
+    "api": "https://api.polyhaven.com/files/kloppenheim_06_puresky",
+    "file": "kloppenheim_06_puresky_2k.hdr",
+    "url": "https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/2k/kloppenheim_06_puresky_2k.hdr",
+    "bytes": 4434394,
+    "sha256": "99451201586489ef3288c97bfac2a2ac232a5491c51a1faf0ec8ea39f3ccd533",
+    "license": "CC0",
+    "license_source": "https://polyhaven.com/license",
+    "author": "Greg Zaal / Jarod Guest",
+    "purpose": "Real environment illumination/reflection source for engine art comparison; not a background gameplay screenshot."
+  }
+]

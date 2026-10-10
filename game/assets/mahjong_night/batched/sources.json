@@ -1,0 +1,95 @@
+{
+  "method": "full original positions/normals; one material surface with per-vertex linear base color and UV-packed PBR; Godot ImporterMesh angle60/25 LODs generated offline, originals retained",
+  "rows": [
+    {
+      "baked": "res://assets/mahjong_night/batched/windbell.res",
+      "full_indices": 18744,
+      "lods": 8,
+      "source": "res://assets/mahjong_night/windbell.glb"
+    },
+    {
+      "baked": "res://assets/mahjong_night/batched/bamboo.res",
+      "full_indices": 33924,
+      "lods": 7,
+      "source": "res://assets/mahjong_night/bamboo.glb"
+    },
+    {
+      "baked": "res://assets/mahjong_night/batched/dew.res",
+      "full_indices": 13560,
+      "lods": 7,
+      "source": "res://assets/mahjong_night/dew.glb"
+    },
+    {
+      "baked": "res://assets/mahjong_night/batched/silk.res",
+      "full_indices": 11040,
+      "lods": 5,
+      "source": "res://assets/mahjong_night/silk.glb"
+    },
+    {
+      "baked": "res://assets/mahjong_night/batched/coal.res",
+      "full_indices": 23352,
+      "lods": 8,
+      "source": "res://assets/mahjong_night/coal.glb"
+    },
+    {
+      "baked": "res://assets/mahjong_night/batched/anvil.res",
+      "full_indices": 8772,
+      "lods": 7,
+      "source": "res://assets/mahjong_night/anvil.glb"
+    },
+    {
+      "baked": "res://assets/mahjong_night/batched/crucible.res",
+      "full_indices": 23352,
+      "lods": 7,
+      "source": "res://assets/mahjong_night/crucible.glb"
+    },
+    {
+      "baked": "res://assets/mahjong_night/batched/ember.res",
+      "full_indices": 12576,
+      "lods": 8,
+      "source": "res://assets/mahjong_night/ember.glb"
+    },
+    {
+      "baked": "res://assets/mahjong_night/batched/redthread.res",
+      "full_indices": 29856,
+      "lods": 8,
+      "source": "res://assets/mahjong_night/redthread.glb"
+    },
+    {
+      "baked": "res://assets/mahjong_night/batched/teacup.res",
+      "full_indices": 14400,
+      "lods": 6,
+      "source": "res://assets/mahjong_night/teacup.glb"
+    },
+    {
+      "baked": "res://assets/mahjong_night/batched/chorus.res",
+      "full_indices": 30288,
+      "lods": 7,
+      "source": "res://assets/mahjong_night/chorus.glb"
+    },
+    {
+      "baked": "res://assets/mahjong_night/batched/fellow.res",
+      "full_indices": 18528,
+      "lods": 8,
+      "source": "res://assets/mahjong_night/fellow.glb"
+    },
+    {
+      "baked": "res://assets/mahjong_night/batched/river_lantern.res",
+      "full_indices": 21648,
+      "lods": 6,
+      "source": "res://assets/mahjong_night/fixtures/river_lantern.glb"
+    },
+    {
+      "baked": "res://assets/mahjong_night/batched/gate_seal.res",
+      "full_indices": 17568,
+      "lods": 4,
+      "source": "res://assets/mahjong_night/fixtures/gate_seal.glb"
+    },
+    {
+      "baked": "res://assets/mahjong_night/batched/gate_arch.res",
+      "full_indices": 6720,
+      "lods": 5,
+      "source": "res://assets/mahjong_night/fixtures/gate_arch.glb"
+    }
+  ]
+}

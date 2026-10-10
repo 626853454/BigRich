@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">
+ <defs>
+  <linearGradient id="sea" x2=".8" y2="1"><stop stop-color="#427f88"/><stop offset="1" stop-color="#203e4b"/></linearGradient>
+  <linearGradient id="ivory" x2=".2" y2="1"><stop stop-color="#fff8e8"/><stop offset="1" stop-color="#d8caa9"/></linearGradient>
+  <linearGradient id="fur" x2=".8" y2="1"><stop stop-color="#edb26a"/><stop offset="1" stop-color="#bd7647"/></linearGradient>
+ </defs>
+ <rect x="7" y="7" width="242" height="242" rx="57" fill="url(#sea)" stroke="#cfb37a" stroke-width="7"/>
+ <path d="M37 193Q125 171 219 202" fill="none" stroke="#62aeb1" stroke-width="7" opacity=".55"/>
+ <rect x="137" y="124" width="77" height="77" rx="19" fill="#18313b" transform="rotate(13 175 162)"/>
+ <rect x="136" y="114" width="77" height="77" rx="19" fill="url(#ivory)" stroke="#b7a172" stroke-width="2" transform="rotate(13 175 152)"/>
+ <g fill="#2c535b"><circle cx="157" cy="135" r="6"/><circle cx="193" cy="143" r="6"/><circle cx="172" cy="154" r="6"/><circle cx="149" cy="170" r="6"/><circle cx="185" cy="178" r="6"/></g>
+ <path d="M50 100Q32 18 79 65Q98 45 134 65Q181 18 162 102" fill="url(#fur)" stroke="#975d41" stroke-width="4"/>
+ <path d="M48 98Q56 68 106 68Q158 68 165 108Q168 169 107 178Q43 167 48 98" fill="url(#fur)"/>
+ <path d="M61 125Q72 103 96 116L106 73L116 116Q147 106 155 132Q148 165 107 165Q70 166 61 125" fill="url(#ivory)"/>
+ <g fill="#243a42"><ellipse cx="79" cy="108" rx="9" ry="12"/><ellipse cx="135" cy="108" rx="9" ry="12"/><path d="M95 132Q106 126 117 132Q115 145 106 145Q98 144 95 132"/></g>
+ <g fill="#fff5dd"><circle cx="77" cy="104" r="3"/><circle cx="133" cy="104" r="3"/></g>
+ <path d="M94 152Q106 157 118 152" fill="none" stroke="#80513e" stroke-width="3" stroke-linecap="round"/>
+ <path d="M66 174Q107 187 147 171L143 189Q103 205 69 187" fill="#bd725d"/>
+ <path d="M115 186L132 180L135 219L116 215" fill="#cf896b"/>
+ <path d="M183 35L188 46L200 48L190 57L192 69L182 63L171 69L173 57L164 49L177 46Z" fill="#e4c27b"/>
+</svg>

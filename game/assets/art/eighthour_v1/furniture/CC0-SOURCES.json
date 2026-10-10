@@ -1,0 +1,74 @@
+{
+  "sources": [
+    {
+      "asset": "dark_wood",
+      "page": "https://polyhaven.com/a/dark_wood",
+      "authors": {
+        "Dario Barresi": "Baking",
+        "Dimitrios Savva": "Photography",
+        "Rico Cilliers": "Tiling"
+      },
+      "license": "CC0",
+      "license_source": "https://polyhaven.com/license"
+    },
+    {
+      "asset": "book_pattern",
+      "page": "https://polyhaven.com/a/book_pattern",
+      "authors": {
+        "Rob Tuytel": "All"
+      },
+      "license": "CC0",
+      "license_source": "https://polyhaven.com/license"
+    }
+  ],
+  "files": [
+    {
+      "file": "dark_wood_diff_1k.jpg",
+      "asset": "dark_wood",
+      "channel": "Diffuse",
+      "source": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/dark_wood/dark_wood_diff_1k.jpg",
+      "sha256": "d68da31655bf47024af893156a6a01a6c95bb60f55d97e2dc9bdd47be320e5b5",
+      "md5_verified": true
+    },
+    {
+      "file": "dark_wood_nor_gl_1k.jpg",
+      "asset": "dark_wood",
+      "channel": "nor_gl",
+      "source": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/dark_wood/dark_wood_nor_gl_1k.jpg",
+      "sha256": "c42541f1bda0a14b39f120c24407eeba699af8ac85b371c7cef98ffd7d7b13bf",
+      "md5_verified": true
+    },
+    {
+      "file": "dark_wood_arm_1k.jpg",
+      "asset": "dark_wood",
+      "channel": "arm",
+      "source": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/dark_wood/dark_wood_arm_1k.jpg",
+      "sha256": "01553cfe4659fa391ca05e0baf6e4f7f239927715ae2fd2cebec1413a69da1d6",
+      "md5_verified": true
+    },
+    {
+      "file": "book_pattern_col1_1k.jpg",
+      "asset": "book_pattern",
+      "channel": "col1",
+      "source": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/book_pattern/book_pattern_col1_1k.jpg",
+      "sha256": "30661c007bd43e5fda5c11a8edb49e0949e19b1b55fdbe3baf7139fb3a0f8a70",
+      "md5_verified": true
+    },
+    {
+      "file": "book_pattern_nor_gl_1k.jpg",
+      "asset": "book_pattern",
+      "channel": "nor_gl",
+      "source": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/book_pattern/book_pattern_nor_gl_1k.jpg",
+      "sha256": "db5d5a1e2bc68125857d3c0cc62502036a54168b646722892638b390ce0545d7",
+      "md5_verified": true
+    },
+    {
+      "file": "book_pattern_arm_1k.jpg",
+      "asset": "book_pattern",
+      "channel": "arm",
+      "source": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/book_pattern/book_pattern_arm_1k.jpg",
+      "sha256": "9c3c6c4c0aa378a9f9425d59438ebd908c5ca7a65f219c2e6cf503b7487d1113",
+      "md5_verified": true
+    }
+  ]
+}

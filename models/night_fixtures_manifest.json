@@ -1,0 +1,17 @@
+[
+  {
+    "id": "river_lantern",
+    "triangles": 7216,
+    "meshes": 5
+  },
+  {
+    "id": "gate_seal",
+    "triangles": 5856,
+    "meshes": 4
+  },
+  {
+    "id": "gate_arch",
+    "triangles": 2240,
+    "meshes": 3
+  }
+]

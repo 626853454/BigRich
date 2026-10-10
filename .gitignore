@@ -1,0 +1,21 @@
+# Godot/editor caches
+.godot/
+__pycache__/
+*.py[cod]
+.DS_Store
+Thumbs.db
+*.blend1
+*.blend2
+
+# Local credentials and generated builds
+.env
+.env.*
+!.env.example
+export_credentials.cfg
+exports/
+build/
+dist/
+*.exe
+*.pck
+*.zip
+*.log

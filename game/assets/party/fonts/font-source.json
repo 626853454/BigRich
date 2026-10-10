@@ -1,0 +1,19 @@
+{
+  "family": "ZCOOL KuaiLe",
+  "license": "OFL-1.1 as shipped by Google Fonts repository; full notice preserved",
+  "upstream": "https://github.com/googlefonts/zcool-kuaile",
+  "files": [
+    {
+      "file": "ZCOOLKuaiLe-Regular.ttf",
+      "source": "https://raw.githubusercontent.com/google/fonts/main/ofl/zcoolkuaile/ZCOOLKuaiLe-Regular.ttf",
+      "sha256": "812a6fc1fe54b6d73a419245c32dfeba8aa33104d5be90d1cf6af082007cb71d",
+      "bytes": 1514968
+    },
+    {
+      "file": "ZCOOLKuaiLe-OFL.txt",
+      "source": "https://raw.githubusercontent.com/google/fonts/main/ofl/zcoolkuaile/OFL.txt",
+      "sha256": "538078469839b4a2e7ad22bef4ebe41681a4e53749bb2a072144024f1d6d703d",
+      "bytes": 4398
+    }
+  ]
+}

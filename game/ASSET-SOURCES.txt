@@ -1,0 +1,25 @@
+本轮视觉资源来源 / 2026-10-07
+
+角色基础模型、贴图：Party Animals / Recreate Games；社区 FurryModels 分发包。
+https://thunderstore.io/c/lethal-company/p/FurryModels/PartyAnimalsModels/
+FurryModels-PartyAnimalsModels-0.1.0，来源ZIP SHA256：1ca5f5c3c42b584b2420c382e776febdcb2f6fc195394a0589c9f633390c7cdc
+本地仅解析嵌入Unity资源数据，没有执行社区DLL。模型作者不等于社区发布者。没有证明商业分发授权；此包用于用户本地风格研究/试玩，不能称这些角色为原创、官方开源或可商用资产。
+本轮基于来源角色调整姿态、实时表面、原权重驱动步态及短毛。不是完整骨骼动画。用户认可的离线毛发样板与实际游戏短毛分别保存，不以离线图冒充实机。
+
+本地 Blender 制作：曲瓦港屋、灯塔、风车、石岸、庭树、灌木、竹簇、拱门、茶亭、麻将桌/房间、钟楼、章节台基、衣帽武器、爆米花敌人。配方和可编辑blend另包。使用自写连续曲面、修饰器和组件建模，并非人工雕塑认证。
+
+ZCOOL KuaiLe 字体：Google Fonts发布，随附原OFL许可证、源网址和SHA。Noto字体及Godot沿用原许可文件。
+https://github.com/google/fonts/tree/main/ofl/zcoolkuaile
+
+旧角色/头像/其他已有GLB未覆盖，保留其原有来源与权利信息。此说明不改变任何第三方资产许可。
+
+2026-10-08 七小时概念与实装迭代补充
+31份当前可编辑Blender场景与77个本轮目录中的GLB：本地脚本/连续曲面/修饰器建模，包含本轮重做与上一UI轮继承；数量不代表商业品质，不称人工雕塑认证。实际角色基础原件仍遵循上面的来源说明。
+UI按钮、面板、开关、徽章、进度轨道是Blender制作并渲染的图集/九宫格材质，游戏使用真实可交互Control。标题、角色、章节微景、骰子、麻将、回声棋盘与环境是引擎内3D；不声称每个UI元素均为实时3D网格。
+本轮概念图由OpenAI图像生成工具生成，作为参考，不是实机。C00为用户认可参考；C01–C16按具名视觉家族分组，C01v1四足稿弃用。实际游戏截图单独保存并标注受控场景。
+技术参考：https://github.com/TripoGrowthLab/awesome-astra-prompts 、Blender官方手册、Godot官方文档。提示词仅用于设计参考，不是程序运行指令。
+正文：Noto Sans SC（Google Fonts），保留OFL，生成本地静态Medium/Bold。
+https://github.com/google/fonts/tree/main/ofl/notosanssc
+标题：Swei Gothic CJK SC Black（max32002），OFL1.1；合并相交轮廓并将“毛球大冒险”五字子集重命名为FurballTitleRound。原字体与许可保留在模型源包reference-font。
+https://github.com/max32002/swei-gothic
+新增加的作者资源不改变第三方角色的权利状况，未取得其商业分发授权证明。
