@@ -24,17 +24,23 @@ func _ready()->void:
 	_title.modulate=Color("ffdf92");_title.outline_modulate=Color("16413e");_title.outline_size=10;_title.billboard=BaseMaterial3D.BILLBOARD_ENABLED
 	_title.position=Vector3(0,2.7,2.2);_title.no_depth_test=true;_title.hide();add_child(_title)
 
-func burst(amount:int,target:int,before:int,origin:Vector3,speed:float)->void:
+func burst(amount:int,target:int,before:int,origin:Vector3,speed:float,plain_base:int=-1,allow_target_with_base:bool=false)->void:
 	if amount<=0:return
 	clear()
 	_count=clampi(6+int(10.0*float(amount)/maxi(target,1)),6,24);_chips.multimesh.visible_instance_count=_count
 	var broke:bool=before<target and before+amount>=target
 	var explosive:bool=amount>=target
+	if plain_base>0:
+		# Build impact follows real amplification, even at a high ordinary-table
+		# goal. Learning has group caps instead, so it suppresses target crossing.
+		broke=broke and allow_target_with_base;explosive=amount>=plain_base*2
+		_count=clampi(5+roundi(3.0*float(amount-plain_base)/plain_base),5,24);_chips.multimesh.visible_instance_count=_count
 	_showlight.configure(get_parent())
 	if broke or explosive:
 		_title.text="突破目标 · %.2f 倍"%(float(before+amount)/maxi(target,1)) if broke else "连锁爆发 · +%d分"%amount
+		if plain_base>0:_title.text="帮手接响 · %d → %d"%[plain_base,amount]
 		_title.modulate.a=1;_title.show()
-	if not reduced_motion and is_instance_valid(camera) and (broke or amount>=target*.5):
+	if not reduced_motion and is_instance_valid(camera) and (broke or (explosive if plain_base>0 else amount>=target*.5)):
 		_lens=create_tween();_lens.set_speed_scale(speed)
 		_lens.tween_property(camera,"fov",38.6,.12).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
 		_lens.tween_property(camera,"fov",40.0,.34).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)

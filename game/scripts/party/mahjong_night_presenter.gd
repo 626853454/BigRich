@@ -1,6 +1,8 @@
 class_name FurMahjongNightPresenter
 extends Control
 var replay_mode:bool=false
+var menu_mode:bool=false
+var _menu_visibility:Dictionary={}
 signal command(kind:String,value:Variant,actor:int,revision:int)
 signal score_beat(operation:String,step:int)
 signal score_skipped
@@ -16,6 +18,7 @@ var use_ai:bool=true
 var selected_index:int=-1
 var selected_river:int=-1
 var opening_selection:Array=[]
+var opening_drawer:String=""
 var action_buttons:Array[Button]=[]
 var _heading:Label
 var _subtitle:Label
@@ -89,6 +92,7 @@ func _ready()->void:
 	_ledger_heading=label("最近一次 · 计分来源",16,Rect2(18,427,284,26),rail)
 	_ledger=rich(Rect2(18,458,285,106),rail)
 	_ledger.scroll_following=true
+	_ledger.meta_clicked.connect(func(_meta:Variant):_emit("score_receipt",null))
 	_gain=label("",44,Rect2(428,153,520,70),self);_gain.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER;_gain.mouse_filter=Control.MOUSE_FILTER_IGNORE;_gain.hide()
 	_combo=FurMahjongNightCombo.new();add_child(_combo)
 	var bottom:=panel(Rect2(22,716,1556,166))
@@ -117,6 +121,7 @@ func _clear(node:Node)->void:
 
 func configure(data:Dictionary,options:Array,ai:bool)->void:
 	_has_hover_preview=false
+	if data.get("phase","")!=snapshot.get("phase","") or data.get("actor",-1)!=snapshot.get("actor",-1) or data.get("night",{}).get("stage",-1)!=snapshot.get("night",{}).get("stage",-1) or data.get("night",{}).get("table",-1)!=snapshot.get("night",{}).get("table",-1):opening_drawer=""
 	if _built and not is_busy():_combo.reset();table_view.highlight_score_tiles([])
 	if data.get("revision",-1)!=snapshot.get("revision",-1):selected_index=-1;selected_river=-1;opening_selection.clear()
 	if data.get("table_event",{}).get("kind","") in ["trick_recall","trick_relay"] and data.table_event.tiles.size()==2:
@@ -124,8 +129,16 @@ func configure(data:Dictionary,options:Array,ai:bool)->void:
 	snapshot=data.duplicate(true);choices=options.duplicate(true);use_ai=ai
 	if _built:_render()
 func is_busy()->bool:return _score_pending or not _score_queue.is_empty() or table_view==null or table_view.is_animating() or (is_instance_valid(_score_motion) and _score_motion.is_running())
+func set_menu_mode(value:bool)->void:
+	if value==menu_mode:return
+	menu_mode=value
+	for child in get_children():
+		if not child is Control or child==table_view or child is ColorRect:continue
+		if value:_menu_visibility[child.get_instance_id()]=child.visible;child.hide()
+		else:child.visible=bool(_menu_visibility.get(child.get_instance_id(),false))
+	if not value:_menu_visibility.clear()
 func _process(_delta:float)->void:
-	if not _built or snapshot.is_empty():return
+	if not _built or snapshot.is_empty() or menu_mode:return
 	if _score_pending and not table_view.is_animating():_score_pending=false;_animate_score()
 	if not _score_queue.is_empty() and not table_view.is_animating() and Time.get_ticks_usec()>=_score_due:_advance_score()
 	var locked:bool=is_busy() or (use_ai and snapshot.actor==1 and snapshot.phase!="finished")
@@ -145,6 +158,9 @@ func _apply_score_focus(force:bool=false)->void:
 	_ledger_heading.text="连锁账单 · 按触发顺序" if focus else "最近一次 · 计分来源"
 	_ledger_heading.position.y=135 if focus else 427
 	_ledger.position.y=166 if focus else 458;_ledger.size.y=398 if focus else 106
+	if not focus and not offering and not snapshot.night.has("welcome") and not snapshot.night.events.is_empty():
+		_ledger_heading.text="刚才这一手 · 接下来"
+		_ledger.text=FurMahjongNightReceipt.summary(snapshot)
 func _lock()->void:
 	for b:Button in action_buttons:b.disabled=_locked or bool(b.get_meta("invalid",false))
 	_reshape_button.disabled=_locked or bool(_reshape_button.get_meta("invalid",false))
@@ -156,6 +172,7 @@ func _emit(kind:String,value:Variant)->void:
 
 func _render()->void:
 	var n:Dictionary=snapshot.night;var actor:int=snapshot.actor
+	_combo.simple_mode=n.has("welcome")
 	_heading.text=("复盘开局" if replay_mode else "百番夜宴")+" · 第 %d / 3 桌"%n.table
 	_subtitle.text=("双声门神 · 双方先开一组，解除倍率护印" if n.boss else ("河灯悬赏 · 每阶段首组使用新揭河牌 +80筹码" if n.table==2 else "公共河牌3 → 4 → 5 · 组牌得分，共同过桌"))
 	if n.venue in Catalog.VENUES:_subtitle.text=Catalog.VENUES[n.venue].name+" · "+{"river":"新河牌首组+80","refrain":"双方本街亮灯，各获下组返场","duet":"双方开组解除护印","prism":"两人各用技艺、至少两种，解除护印"}[n.venue]
@@ -188,6 +205,8 @@ func _render()->void:
 	_render_build();_render_actions();_render_offer();_animate_score()
 	_locked=is_busy() or (use_ai and actor==1 and snapshot.phase!="finished");_lock()
 	_apply_score_focus(true)
+	_contributions.visible=not n.has("welcome")
+	if n.has("welcome"):FurMahjongNightWelcomeUI.render(self)
 
 func _render_build()->void:
 	var n:Dictionary=snapshot.night
@@ -205,6 +224,7 @@ func _render_build()->void:
 	_build_text.text="\n".join(build_lines)
 
 func _render_actions()->void:
+	if snapshot.night.has("welcome"):FurMahjongNightWelcomeUI.actions(self);return
 	_clear(_action_row);action_buttons.clear()
 	var phase:String=snapshot.phase;var actor:int=snapshot.actor
 	_reshape_button.visible=phase=="discard" and not snapshot.melds[actor].is_empty() and not (use_ai and actor==1)
@@ -216,13 +236,7 @@ func _render_actions()->void:
 	if not continue_possible and not reshape_possible:
 		_reshape_button.text="一手两响\n本回合已用技艺" if snapshot.night.direction.trick_used[actor] else ("一手两响\n灵感不足 · 亮灯可补充" if snapshot.night.direction.inspiration[actor]<=0 else "一手两响\n还差关键牌 · 看河牌补形")
 	if phase=="night_offer":
-		_hint.text="点选最多3张手牌可换起手；准备后先揭河牌，再正常摸牌。" if snapshot.night.stage==0 else "新一张河牌仍盖着：可加码或保持。揭牌后本次押约锁定。"
-		if snapshot.night.stage==0:
-			var mark:=button("帮我标出散牌\n保护对子、邻张和传家牌",_suggest_opening,Vector2(240,85));mark.set_meta("invalid",snapshot.night.mulligan_used[actor]);_action_row.add_child(mark);action_buttons.append(mark)
-			var b:=button("换掉选中 %d 张\n本桌一次，不获得茶气"%opening_selection.size(),func():_emit("mulligan",opening_selection.duplicate()),Vector2(280,85))
-			b.set_meta("invalid",opening_selection.is_empty() or snapshot.night.mulligan_used[actor]);_action_row.add_child(b);action_buttons.append(b)
-			for id:String in Tea.RECIPES:
-				var tea_id:String=id;var b2:=button(Tea.RECIPES[id].name+"\n"+Tea.RECIPES[id].short,func():_emit("tea",tea_id),Vector2(230,85),"selected" if snapshot.tea.recipe==id else "ivory");_action_row.add_child(b2);action_buttons.append(b2)
+		FurMahjongNightOpeningUI.actions(self)
 		return
 	if phase=="finished":
 		_hint.text="本桌结束：可以回看亮出的牌与完整计分来源。空格跳过演出。"
@@ -245,9 +259,12 @@ func _render_actions()->void:
 		var trick:=button("灵感 %d\n回手 / 催演 / 递彩"%snapshot.night.direction.inspiration[actor],func():_emit("trick_picker",selected_index),Vector2(220,88),"primary" if snapshot.night.direction.boost[actor] else "ivory")
 		if "coal" in snapshot.night.build.items[actor]:trick.text="灵感 %d\n添火 / 改牌 / 催演"%snapshot.night.direction.inspiration[actor]
 		trick.set_meta("invalid",snapshot.night.direction.inspiration[actor]<=0 or snapshot.night.direction.trick_used[actor]);_action_row.add_child(trick);action_buttons.append(trick)
-		var river:=button("河牌补形\n看可成牌换法",func():_emit("river_picker",null),Vector2(180,88));_action_row.add_child(river);action_buttons.append(river)
+		var has_meld:bool=choices.any(func(c:Dictionary)->bool:return c.kind in ["self_chi","self_pon","closed_kong","added_kong","tsumo"])
+		var river:=button("再亮一组\n续奏花1灵感" if continue_possible else ("河牌补形\n看可成牌换法" if has_meld else "帮我找一组\n先看一种走法"),func():_emit("reshape_picker" if continue_possible else ("river_picker" if has_meld else "first_move"),null),Vector2(180,88),"primary" if continue_possible or not has_meld else "ivory");_action_row.add_child(river);action_buttons.append(river)
+		if not has_meld:_action_row.move_child(river,0)
 		var has_skill:bool=choices.any(func(c:Dictionary)->bool:return c.kind=="skill")
-		var tools:=button("同桌协作"+(" / 观牌" if has_skill else "")+"\n要牌 · 换签 · 收桌",func():_emit("table_tools",null),Vector2(204,88));_action_row.add_child(tools);action_buttons.append(tools)
+		var reached:bool=snapshot.night.bank_preview>=snapshot.night.target
+		var tools:=button("达标了 · 选下一步\n收桌 / 加演 / 继续" if reached else "同桌协作"+(" / 观牌" if has_skill else "")+"\n要牌 · 换签 · 收桌",func():_emit("table_tools",null),Vector2(204,88),"primary" if reached else "ivory");_action_row.add_child(tools);action_buttons.append(tools)
 	var displayed:int=0;var hidden_choices:bool=false
 	for index:int in _ranked_choices():
 		var i:int=index;var c:Dictionary=choices[index]
@@ -256,8 +273,10 @@ func _render_actions()->void:
 		if phase=="discard" and displayed>=2:hidden_choices=true;continue
 		displayed+=1
 		var extra:String=("\n借形" if c.chain.method=="reshape" else "\n续奏")+"两响合计 %d"%c.chain.total if c.has("chain") else ("\n可点亮本街目标" if can_light(c) else "")
+		if not c.has("chain") and c.has("preview") and FurMahjongNightWelcomePayoff.eligible(c.preview):extra="\n亮一组 · 响 %d 次"%c.preview.repeats
 		if snapshot.night.has("lesson") and snapshot.night.lesson.get("guided",true) and snapshot.melds[actor].is_empty() and c.get("tiles",[])==[0,4,8]:extra="\n练招 · 先亮这组"
 		var b:=button(c.label+extra,func():_emit("action",i),Vector2(226,88),"primary" if c.kind in ["ron","tsumo"] or can_light(c) else "ivory");b.tooltip_text=c.get("detail","");_action_row.add_child(b);action_buttons.append(b)
+		b.set_meta("score_choice",i)
 		_action_row.move_child(b,displayed-1)
 		if c.has("preview"):
 			b.mouse_entered.connect(func():
@@ -280,12 +299,17 @@ func _render_actions()->void:
 		elif choices.any(func(c:Dictionary)->bool:return c.kind in ["self_chi","self_pon"]):_hint.text="催演放大一组；续奏多亮一组；借形找回关键牌。它们共用本回合技艺额度。也可以留暗手冲胡。"
 		elif "coal" in snapshot.night.build.items[actor] and not d.trick_used[actor] and d.inspiration[actor]>0:_hint.text="暂时没有完整面子。可花灵感添火铺下一手，或留灵感改牌；「同桌协作」能公开要缺张。"
 		elif not d.trick_used[actor] and d.inspiration[actor]>0:_hint.text="暂时没有完整面子。点选散牌后，可用灵感回手/递彩补牌；也可公开要缺张，等伙伴接力。"
+		if snapshot.night.self_used[actor] and snapshot.night.reshape.followup[actor].is_empty():
+			if continue_possible:_hint.text="普通夜宴每回合先亮一组。手里还有现成组合：点「再亮一组」花1灵感续奏；也可打出一张，留到下回合。"
+			elif choices.any(func(c:Dictionary)->bool:return c.kind in ["closed_kong","added_kong","tsumo"]):_hint.text="本回合已经亮过一组。仍可用下方合法的杠／胡牌按钮；也可保留材料，打出一张结束回合。"
+			elif not choices.any(func(c:Dictionary)->bool:return c.kind in ["self_chi","self_pon","closed_kong","tsumo"]):
+				_hint.text="本回合已经亮过一组。"+("可用左上「借形改组」找回关键牌追击，或打牌结束回合。" if reshape_possible else "当前不能再续奏；选一张打出结束回合，保留材料等下一手。")
 	if phase=="discard" and selected_index>=0:
 		var clue=Rules.new();clue._s=snapshot.duplicate(true)
 		_hint.text="选中 "+ChapterMahjongTable.tile_name(snapshot.hands[actor][selected_index])+" · "+clue.hand_clue(selected_index).text+" 再点同牌可取消。"
 	elif phase=="discard" and snapshot.night.get("deliveries",[-1,-1])[actor] in snapshot.tea.tray:_hint.text="伙伴送来的 "+ChapterMahjongTable.tile_name(snapshot.night.deliveries[actor])+" 已在河牌。选手牌再点它交换；茶气不足时可以用灵感递彩。"
 	if phase=="discard" and selected_index<0 and snapshot.night.bank_preview>=snapshot.night.target:
-		_hint.text="已达标！可在「同桌协作」安稳收桌"+("，或邀伙伴加演追额外金币；也可继续做牌。" if snapshot.night.table<3 and not snapshot.night.encore.asked and snapshot.night.bank_preview<ceili(float(snapshot.night.encore.base_target)*1.6) else "，也可继续做大胡，争取溢出奖励。")
+		_hint.text="已达标！点「达标了 · 选下一步」提议安稳收桌"+("，或邀伙伴加演追额外金币；也可继续做牌。" if snapshot.night.table<3 and not snapshot.night.encore.asked and snapshot.night.bank_preview<ceili(float(snapshot.night.encore.base_target)*1.6) else "，也可继续做大胡，争取溢出奖励。")
 	if phase=="discard" and selected_index<0 and snapshot.table_event.kind in ["encore","offer"] and not str(snapshot.night.encore.get("note","")).is_empty():_hint.text="泡泡："+snapshot.night.encore.note
 	if phase=="discard" and not snapshot.night.reshape.followup[actor].is_empty():_hint.text="借形追击已准备：用刚借回的金框实体牌，可再亮一组。只限本回合；打出手牌就放弃追击。"
 	if phase=="claim":_hint.text="回应 "+ChapterMahjongTable.tile_name(snapshot.last_discard.tile)+("：末张仅可胡或过，不额外增加个人回合。" if snapshot.discard_count>=12 else "：吃碰可立即得分；过则正常摸牌。")
@@ -300,43 +324,22 @@ func _restore_borrowed_focus()->void:
 	table_view.highlight_score_tiles(ids)
 
 func _render_offer()->void:
-	_offer_panel.visible=snapshot.phase=="night_offer";_clear(_offer_column)
-	_ledger.visible=not _offer_panel.visible;_ledger_heading.visible=not _offer_panel.visible
-	_goal_column.visible=_offer_panel.visible;_build_text.visible=not _offer_panel.visible;_build_heading.visible=not _offer_panel.visible;_requests.visible=not _offer_panel.visible;_clear(_goal_column)
-	if not _offer_panel.visible:return
-	var n:Dictionary=snapshot.night;var actor:int=snapshot.actor
-	var goal_title:=Label.new();goal_title.text="先选一个本街目标";goal_title.add_theme_font_size_override("font_size",20);goal_title.add_theme_color_override("font_color",Color("f8dfa7"));_goal_column.add_child(goal_title)
-	for id:String in n.direction.offers[actor]:
-		var goal_id:String=id;var goal:Dictionary=FurMahjongNightDirection.GOALS[id]
-		var choice:=button("本街 · "+goal.name+"\n"+goal.text,func():_emit("spotlight",goal_id),Vector2(282,86),"selected" if n.direction.selected[actor]==id else "ivory");choice.add_theme_font_size_override("font_size",16);_goal_column.add_child(choice);action_buttons.append(choice)
-	var reward:=Label.new();reward.text="亮灯：+2币 / +1灵感\n之后每组 +16筹码\n只认本街新亮组，暗胡不补灯";reward.add_theme_font_size_override("font_size",15);reward.add_theme_color_override("font_color",Color("f4dfb5"));_goal_column.add_child(reward)
-	var title:=Label.new();title.text=["小柯","泡泡"][actor]+(" · 读牌后立约" if n.stage==0 else " · 揭牌前最后决定");title.add_theme_font_size_override("font_size",23);title.add_theme_color_override("font_color",Color("f7eedc"));_offer_column.add_child(title)
-	var promised:int=n.get("promised_tiles",[-1,-1])[1-actor]
-	if n.stage==0 and promised>=0 and promised in snapshot.hands[1-actor] and n.requests[actor]==int(promised/4):title.text+=" · 伙伴已带 "+ChapterMahjongTable.tile_name(promised)
-	var row:=HBoxContainer.new();row.add_theme_constant_override("separation",8);_offer_column.add_child(row)
-	for id:String in Catalog.CONTRACTS:
-		var contract:String=id
-		var b:=button(Catalog.CONTRACTS[id].name,func():_emit("offer",[contract,n.tiers[actor]]),Vector2(245,52),"selected" if n.contracts[actor]==id else "ivory")
-		b.tooltip_text=Catalog.CONTRACTS[id].text
-		b.set_meta("invalid",n.stage>0 and n.contracts[actor]!=id);row.add_child(b);action_buttons.append(b)
-	var condition:=Label.new();condition.text="成约条件："+Catalog.CONTRACTS[n.contracts[actor]].text;condition.add_theme_font_size_override("font_size",17);condition.add_theme_color_override("font_color",Color("e6d9b6"));_offer_column.add_child(condition)
-	var wager:=HBoxContainer.new();wager.add_theme_constant_override("separation",8);_offer_column.add_child(wager)
-	for i in 3:
-		var tier:int=i
-		var b:=button(["不押 · 保留金币","押2币 · 成约 ×1.3","押5币 · 成约 ×1.5"][i],func():_emit("offer",[n.contracts[actor],tier]),Vector2(245,52),"selected" if n.tiers[actor]==i else "ivory")
-		b.set_meta("invalid",i<n.tiers[actor] or Catalog.STAKES[i]-n.paid[actor]>n.wallets[actor]);wager.add_child(b);action_buttons.append(b)
-	var note:=Label.new();note.text="成功退本金；失败损失押金。成约后不能补押，两人独立钱包。";note.add_theme_font_size_override("font_size",15);note.add_theme_color_override("font_color",Color("e6d9b6"));_offer_column.add_child(note)
-	var ready:=button("准备好了 · "+("公开前三张" if n.stage==0 else "翻开下一张"),func():_emit("ready",null),Vector2(748,49),"primary");_offer_column.add_child(ready);action_buttons.append(ready)
+	FurMahjongNightOpeningUI.offer(self)
 
 func _select(index:int,actor:int,revision:int)->void:
 	if is_busy() or actor!=snapshot.actor or revision!=snapshot.revision or (use_ai and actor==1):return
 	if snapshot.phase=="night_offer" and snapshot.night.stage==0:
+		if snapshot.night.mulligan_used[actor]:return
+		opening_drawer="hand"
 		if index in opening_selection:opening_selection.erase(index)
 		elif opening_selection.size()<3:opening_selection.append(index)
 		_mark_opening_tiles();_render_actions();_render_offer();_locked=false;_lock();return
 	if snapshot.phase!="discard":return
 	_has_hover_preview=false;_combo.reset();table_view.highlight_score_tiles([])
 	selected_index=-1 if selected_index==index else index;selected_river=-1;table_view.select_tile(selected_index);_render_actions();_locked=false;_lock()
+	if snapshot.night.has("welcome") and selected_index>=0:
+		for option:Dictionary in choices:
+			if snapshot.hands[actor][selected_index] in option.tiles:table_view.highlight_score_tiles(option.tiles);break
 
 func _suggest_opening()->void:
 	if is_busy() or (use_ai and snapshot.actor==1):return
@@ -350,12 +353,14 @@ func _mark_opening_tiles()->void:
 	for index:int in opening_selection:ids.append(snapshot.hands[snapshot.actor][index])
 	table_view.highlight_score_tiles(ids)
 func _exchange(slot:int,actor:int,revision:int)->void:
+	if snapshot.night.has("welcome"):return
 	if is_busy() or actor!=snapshot.actor or revision!=snapshot.revision or (use_ai and actor==1):return
 	if selected_index<0:
 		selected_river=slot;_render_actions();_locked=false;_lock();_hint.text="已选河牌 "+ChapterMahjongTable.tile_name(snapshot.tea.tray[slot])+"；可在「同桌协作」花2茶气换签，或先选手牌再与它交换。";return
 	_emit("exchange",Vector2i(selected_index,slot))
 
 func _preview_exchange(slot:int)->void:
+	if snapshot.night.has("welcome"):return
 	if is_busy():return
 	if slot<0:
 		if _has_hover_preview:_hint.text=_hint_before_hover;_combo.reset();_restore_borrowed_focus();_has_hover_preview=false
@@ -397,7 +402,11 @@ func _animate_score()->void:
 				var detail:Dictionary=inner.duplicate(true);detail.preview_only=true
 				_score_queue.append({"type":"row","row":detail,"actor":event.actor,"pause":_step_pause(inner,.065)})
 			_score_queue.append({"type":"row","row":row.duplicate(true),"actor":event.actor,"pause":_step_pause(row,.065)})
-		_score_queue.append({"type":"gain","amount":event.total,"actor":event.actor,"kind":event.kind,"tiles":event.tiles.duplicate(),"before":subtotal,"after":subtotal+event.total,"pause":.98 if event.kind=="hu" else .46})
+		if FurMahjongNightWelcomePayoff.eligible(event):
+			_score_queue.append_array(FurMahjongNightWelcomePayoff.slices(event,subtotal))
+		else:
+			var wind:Dictionary=FurMahjongNightWindPayoff.profile(event)
+			_score_queue.append({"type":"gain","amount":event.total,"actor":event.actor,"kind":event.kind,"tiles":event.tiles.duplicate(),"plain_base":event.get("welcome_base",-1),"wind":wind,"before":subtotal,"after":subtotal+event.total,"pause":1.10 if not wind.is_empty() else (.98 if event.kind=="hu" or (event.has("welcome_base") and event.total>=event.welcome_base*2) else .46)})
 		if event.has("two_chimes"):_score_queue.append({"type":"two_chimes","actor":event.actor,"pair":event.two_chimes.duplicate(true),"pause":.80})
 		subtotal+=event.total
 	_score_queue.append({"type":"end","pause":0.0});_score_due=Time.get_ticks_usec()
@@ -411,7 +420,8 @@ func _advance_score()->void:
 	match entry.type:
 		"row":_score_step(entry.row,entry.actor)
 		"gain":
-			_event_gain(entry.amount,entry.actor,entry.kind,entry.tiles)
+			if entry.has("repeat_index"):FurMahjongNightWelcomePayoff.present(self,entry)
+			else:_event_gain(entry.amount,entry.actor,entry.kind,entry.tiles,entry.plain_base,entry.get("wind",{}))
 			if is_instance_valid(_score_motion):_score_motion.kill()
 			_score_motion=create_tween();_score_motion.set_speed_scale(pace)
 			_score_motion.tween_method(_score_number.bind(int(snapshot.night.target),int(entry.actor),float(entry.before),float(_shown_contributions[entry.actor])),float(entry.before),float(entry.after),.23).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
@@ -437,9 +447,11 @@ func _score_step(row:Dictionary,actor:int)->void:
 	if row.op=="lamp":phrase=row.source+" · +2币 / +1灵感 / 后续+16筹码"
 	if row.op=="refrain_gain":phrase="双灯返场 · 双方下个新亮组各再计一次"
 	if row.op=="heat":phrase="茶炉重算已兑现 · 炉温归零" if row.get("spent",false) else ("茶炉蓄满 · 下一组顺/刻再计一次" if int(row.value)==2 else "茶炉积火 · 炉温1/2，可花灵感添火")
+	if snapshot.night.has("welcome") and row.op=="heat" and int(row.value)==1:phrase="茶炉 1/2 · 再亮一组刻子就蓄满"
 	_score_lines.append(phrase);_ledger.text="\n".join(_score_lines)
 	_gain.hide();_combo.present(row);table_view.highlight_score_tiles(row.get("tiles",[]))
 	if row.op=="heat" and not row.get("preview_only",false) and is_instance_valid(table_view.night_relics):table_view.night_relics.commit_heat(actor,int(row.value),not _skipping_score);_render_build()
+	if snapshot.night.has("welcome"):FurMahjongNightWelcomeUI.render(self)
 	if is_instance_valid(table_view.night_stagecraft):
 		if row.op=="lamp":table_view.night_stagecraft.commit_reward(actor)
 		elif row.op=="support":table_view.night_stagecraft.commit_reward(1-actor)
@@ -465,25 +477,30 @@ func _score_step(row:Dictionary,actor:int)->void:
 				if row.source==Catalog.name_of(id):sound_op=Catalog.ITEMS[id].route+":"+row.op;break
 		score_beat.emit(sound_op,_beat_index);_beat_index+=1
 
-func _event_gain(amount:int,actor:int,kind:String,tiles:Array=[])->void:
+func _event_gain(amount:int,actor:int,kind:String,tiles:Array=[],plain_base:int=-1,wind:Dictionary={})->void:
 	_gain.hide();_combo.gain(amount,kind,["小柯","泡泡"][actor])
+	if plain_base>0:_combo.welcome_gain(amount,plain_base)
 	if not _skipping_score and is_instance_valid(table_view.night_feedback):
 		var origin:=Vector3(0,.65,3.6 if actor==0 else -3.6)
 		var sum:=Vector3.ZERO;var count:int=0
 		for id:int in tiles:
 			if table_view.transforms.has(id):sum+=table_view.transforms[id].origin;count+=1
 		if count>0:origin=sum/float(count)+Vector3(0,.35,0)
-		table_view.night_feedback.burst(amount,int(snapshot.night.target),roundi(_shown_score),origin,1.6 if fast_presentation else 1.0)
+		var impact_base:int=int(wind.get("base",plain_base))
+		table_view.night_feedback.burst(amount,int(snapshot.night.target),roundi(_shown_score),origin,1.6 if fast_presentation else 1.0,impact_base,plain_base<0)
 		if kind=="hu":table_view.celebrate_score(actor)
 		elif amount>=maxf(120.0,float(snapshot.night.target)*.20):table_view.celebrate_score(actor,clampf(float(amount)/maxi(1,snapshot.night.target),.35,.75))
 	_score_lines.append("[color=#e9c977]%s 入账 +%s[/color]"%[["小柯","泡泡"][actor],_number(amount)]);_ledger.text="\n".join(_score_lines)
+	if not wind.is_empty():FurMahjongNightWindPayoff.present(self,wind,amount,actor,tiles)
 	if not _skipping_score:
+		if not wind.is_empty():score_beat.emit("build_wind_finish",_beat_index);return
 		var crossed:bool=_shown_score<float(snapshot.night.target) and _shown_score+amount>=float(snapshot.night.target)
+		if plain_base>0:score_beat.emit("build_wind_finish" if amount>=plain_base*2 else "total",_beat_index);return
 		score_beat.emit(("overkill" if amount>=int(snapshot.night.target)*2 else "hu") if kind=="hu" else ("breakthrough" if crossed else "total"),_beat_index)
 func _score_number(value:float,target:int,actor:int=-1,total_before:float=0,actor_before:float=0)->void:
 	if actor>=0:_shown_contributions[actor]=roundi(actor_before+value-total_before)
 	_contributions.text="小柯 %s  ·  泡泡 %s"%[_number(_shown_contributions[0]),_number(_shown_contributions[1])]
-	_shown_score=value;_score.text=("实得 %s 分"%_number(roundi(value))) if snapshot.night.has("lesson") else "%s / %s"%[_number(roundi(value)),_number(target)];_progress.value=value
+	_shown_score=value;_score.text=("实得 %s 分"%_number(roundi(value))) if snapshot.night.has("lesson") or snapshot.night.has("welcome") else "%s / %s"%[_number(roundi(value)),_number(target)];_progress.value=value
 func _number(value:int)->String:
 	var raw:String=str(value);var result:String=""
 	for i in raw.length():result+=raw[i];var left:int=raw.length()-i-1;if left>0 and left%3==0:result+="," 
@@ -497,7 +514,9 @@ func skip_score()->void:
 	if is_instance_valid(_score_motion):_score_motion.kill()
 	for entry:Dictionary in _score_queue:
 		if entry.type=="row":_score_step(entry.row,entry.actor)
-		elif entry.type=="gain":_event_gain(entry.amount,entry.actor,entry.kind,entry.tiles)
+		elif entry.type=="gain":
+			if entry.has("repeat_index"):FurMahjongNightWelcomePayoff.present(self,entry)
+			else:_event_gain(entry.amount,entry.actor,entry.kind,entry.tiles,entry.plain_base,entry.get("wind",{}))
 	_score_queue.clear();_shown_contributions=snapshot.night.scores.duplicate();_score_number(snapshot.night.scores[0]+snapshot.night.scores[1],snapshot.night.target)
 	if is_instance_valid(table_view.night_relics):table_view.night_relics.reset_pulses()
 	if is_instance_valid(table_view.night_feedback):table_view.night_feedback.clear()

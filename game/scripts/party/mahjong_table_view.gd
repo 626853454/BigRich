@@ -159,7 +159,10 @@ func _sync_tiles(animate:bool)->void:
 	if state_data.has("night") and not is_instance_valid(night_feedback):night_feedback=FurMahjongNightFeedback.new();stage.add_child(night_feedback)
 	if is_instance_valid(night_feedback):night_feedback.camera=camera_3d
 	if state_data.has("night") and not is_instance_valid(night_stagecraft):night_stagecraft=FurMahjongNightStagecraft.new();stage.add_child(night_stagecraft)
-	if is_instance_valid(night_stagecraft):night_stagecraft.configure(state_data.night,0 if ai_enabled else int(state_data.actor))
+	if is_instance_valid(night_stagecraft):
+		night_stagecraft.configure(state_data.night,0 if ai_enabled else int(state_data.actor))
+		night_stagecraft.visible=not state_data.night.has("welcome")
+		night_stagecraft.process_mode=Node.PROCESS_MODE_INHERIT if night_stagecraft.visible else Node.PROCESS_MODE_DISABLED
 	if state_data.has("night") and not is_instance_valid(night_encore_stage):
 		night_encore_stage=FurMahjongNightEncoreStage.new();stage.add_child(night_encore_stage);night_encore_stage.seal_landed.connect(func():_sound("encore_accept"))
 	if is_instance_valid(night_encore_stage):night_encore_stage.configure(state_data,0 if ai_enabled else int(state_data.actor),presentation_speed,not ai_enabled)
@@ -207,6 +210,8 @@ func _sync_tiles(animate:bool)->void:
 			var point:=Vector3((index-(hands[actor].size()-1)*.5)*.98,.84,sign_value*6.05)
 			if actor==1:point.x=-point.x
 			if actor==int(state_data.get("actor",0)) and (index==selected_index or index in selected_indices):point.y+=.23;point.z+=sign_value*.18
+			var lesson:Dictionary=state_data.get("night",{}).get("welcome",{})
+			if actor==0 and lesson.get("kind","")=="tutorial" and lesson.get("number",0)==1 and int(hands[actor][index]) in [0,4,8]:point.y+=.25
 			var hand_basis:=Basis(Vector3.UP,PI if actor==1 else 0).scaled(Vector3.ONE*1.10)
 			if state_data.get("phase","")=="finished":hand_basis=Basis(Vector3.RIGHT,-PI/2).rotated(Vector3.UP,PI if actor==1 else 0).scaled(Vector3.ONE*1.10);point.y=.48
 			_place(int(hands[actor][index]),point,hand_basis,visible)
@@ -247,6 +252,10 @@ func _sync_tiles(animate:bool)->void:
 			var collision:=CollisionShape3D.new();var shape:=BoxShape3D.new();shape.size=Vector3(.85,1.24,.39);collision.shape=shape;area.add_child(collision);pick_root.add_child(area)
 	var sign_view:float=1.0 if viewer_actor==0 else -1.0
 	var desired:=Vector3(1.8*sign_view,13.8,22.8*sign_view)
+	var look_point:=Vector3(0,.45,sign_view)
+	var welcome_camera:Dictionary=state_data.get("night",{}).get("welcome",{})
+	if welcome_camera.get("kind","")=="tutorial" and welcome_camera.get("number",0)<3:
+		desired=Vector3(-1.4,10.8,19.4);look_point=Vector3(-1.4,.6,3.0)
 	if state_data.has("night") and viewer_actor==1:desired=Vector3(-1.8,14.8,-20.0)
 	var camera_start:Vector3=camera_3d.position
 	var relic_start:float=night_relics.rotation.y if is_instance_valid(night_relics) else 0.0
@@ -255,7 +264,7 @@ func _sync_tiles(animate:bool)->void:
 	var kind:String=event.get("kind","")
 	if not animate:
 		if is_instance_valid(night_relics):night_relics.rotation.y=relic_target
-		camera_3d.position=desired;camera_3d.look_at(Vector3(0,.45,sign_view));_update_meshes();return
+		camera_3d.position=desired;camera_3d.look_at(look_point);_update_meshes();return
 	var target:Dictionary=transforms.duplicate();var starts:Dictionary={};var changed_ids:Array=[]
 	var flight_ids:Array=event.get("tiles",[]).duplicate()
 	var drawn_id:int=state_data.get("drawn_tile",-1)
@@ -370,7 +379,7 @@ func _sync_tiles(animate:bool)->void:
 		if camera_start.distance_to(desired)>.1:
 			var azimuth:float=lerp_angle(atan2(camera_start.x,camera_start.z),atan2(desired.x,desired.z),eased)
 			var radius:float=lerpf(Vector2(camera_start.x,camera_start.z).length(),Vector2(desired.x,desired.z).length(),eased)
-			camera_3d.position=Vector3(sin(azimuth)*radius,lerpf(camera_start.y,desired.y,eased),cos(azimuth)*radius);camera_3d.look_at(Vector3(0,.45,sign_view))
+			camera_3d.position=Vector3(sin(azimuth)*radius,lerpf(camera_start.y,desired.y,eased),cos(azimuth)*radius);camera_3d.look_at(look_point)
 		if is_instance_valid(night_relics):night_relics.rotation.y=lerp_angle(relic_start,relic_target,eased)
 		for i in _pawns.size():
 			var gesture:float=sin(t*PI)*(.75 if kind in ["chi","pon","kong","win"] else .45) if i==actor else 0.0
@@ -381,7 +390,7 @@ func _sync_tiles(animate:bool)->void:
 		_update_meshes(),0.0,1.0,duration)
 	_motion.tween_callback(func():
 		if is_instance_valid(night_relics):night_relics.rotation.y=relic_target
-		transforms=target;camera_3d.position=desired;camera_3d.look_at(Vector3(0,.45,sign_view));_busy=false;_callout.text="";_update_meshes()
+		transforms=target;camera_3d.position=desired;camera_3d.look_at(look_point);_busy=false;_callout.text="";_update_meshes()
 		if defer_turn:
 			state_data.table_event={"kind":"camera_turn","actor":requested_viewer,"tiles":[]};_sync_tiles(true))
 
@@ -423,11 +432,13 @@ func reset_score_pose()->void:
 		_score_pose.kill()
 		for rig:FurMahjongTableContactRig in table_rigs:rig.seat()
 
-func echo_score_tiles(ids:Array)->void:
+func echo_score_tiles(ids:Array,strength:float=1.0)->void:
 	# Move the existing physical IDs, then return exactly to their resting poses.
 	# No duplicate cards, collider movement or scoring mutation is involved.
 	reset_score_echo()
 	if _busy:return
+	strength=clampf(strength,1.0,1.8)
+	if is_instance_valid(night_feedback) and night_feedback.reduced_motion:strength=1.0
 	for id:int in ids:
 		if transforms.has(id) and shown_faces.has(id):_echo_rest[id]=transforms[id]
 	if _echo_rest.is_empty():return
@@ -438,10 +449,29 @@ func echo_score_tiles(ids:Array)->void:
 			var id:int=order[i];var rest:Transform3D=_echo_rest[id]
 			var phase:float=clampf((t-float(i)*.035)/.82,0,1)
 			var lift:float=sin(phase*PI)
-			var pose:Transform3D=rest;pose.origin.y+=lift*.24
+			var pose:Transform3D=rest;pose.origin.y+=lift*.24*strength
 			pose.basis=rest.basis.rotated(Vector3.RIGHT,sin(phase*TAU)*.045)
 			transforms[id]=pose
-		_update_meshes(),0.0,1.0,.29)
+		_update_meshes(),0.0,1.0,.29*sqrt(strength))
+	_score_echo.tween_callback(reset_score_echo)
+
+func flourish_score_tiles(ids:Array)->void:
+	# Wind payoff: a travelling lift of the SAME three physical tiles. No extra
+	# models, particles or scoring calls. Skip/reset restores every exact pose.
+	reset_score_echo()
+	if _busy:return
+	if is_instance_valid(night_feedback) and night_feedback.reduced_motion:
+		highlight_score_tiles(ids);return
+	for id:int in ids:
+		if transforms.has(id) and shown_faces.has(id):_echo_rest[id]=transforms[id]
+	if _echo_rest.is_empty():return
+	var order:Array=_echo_rest.keys();order.sort()
+	_score_echo=create_tween();_score_echo.set_speed_scale(presentation_speed)
+	_score_echo.tween_method(func(t:float):
+		for i in order.size():
+			var id:int=order[i];var rest:Transform3D=_echo_rest[id]
+			transforms[id]=NightTileMotion.wind_flourish(rest,i,order.size(),t,viewer_actor)
+		_update_meshes(),0.0,1.0,.90)
 	_score_echo.tween_callback(reset_score_echo)
 
 func reset_score_echo()->void:
@@ -581,9 +611,13 @@ func highlight_score_tiles(ids:Array)->void:
 func _update_score_highlights()->void:
 	if not is_instance_valid(_score_highlight):return
 	var list:Array[Transform3D]=[]
+	var guided:bool=state_data.get("night",{}).has("welcome")
 	for id:int in _highlighted_tiles:
 		if not transforms.has(id):continue
 		for edge in [Vector4(-.447,0,.027,1.28),Vector4(.447,0,.027,1.28),Vector4(0,.635,.90,.027),Vector4(0,-.635,.90,.027)]:
+			if guided:
+				if edge.z<.1:edge.z=.05
+				else:edge.w=.05
 			list.append(transforms[id]*Transform3D(Basis().scaled(Vector3(edge.z,edge.w,.023)),Vector3(edge.x,edge.y,.196)))
 	_score_highlight.multimesh.instance_count=list.size()
 	for i in list.size():_score_highlight.multimesh.set_instance_transform(i,list[i])

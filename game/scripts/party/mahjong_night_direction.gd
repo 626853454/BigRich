@@ -48,6 +48,8 @@ static func matches(id:String,kind:String,tiles:Array,context:Dictionary,receive
 	return false
 
 static func complete(n:Dictionary,actor:int,kind:String,tiles:Array,context:Dictionary)->Dictionary:
+	# The introductory small table deliberately has no lamp objective/reward.
+	if n.has("welcome"):return {}
 	var d:Dictionary=n.direction;var id:String=d.selected[actor]
 	if d.done[actor] or not matches(id,kind,tiles,context,d.river_taken[actor]):return {}
 	d.done[actor]=true;d.inspiration[actor]=mini(3,d.inspiration[actor]+1);d.applause[actor]+=16;n.wallets[actor]+=2

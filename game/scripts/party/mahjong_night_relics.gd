@@ -13,7 +13,8 @@ var _heat_events:int=0
 var _thermal_time:float=0.0
 
 func configure(night:Dictionary)->void:
-	var signature:String=JSON.stringify([night.build.items,night.build.shared])
+	var simple:bool=night.has("welcome")
+	var signature:String=JSON.stringify([night.build.items,night.build.shared,simple])
 	if signature==_signature:_sync_heat(night);return
 	_signature=signature
 	for tween:Tween in _motion.values():
@@ -25,6 +26,7 @@ func configure(night:Dictionary)->void:
 		for i in night.build.items[actor].size():ids[(0 if actor==0 else 3)+i]=night.build.items[actor][i]
 	if not night.build.shared.is_empty():ids[2]=night.build.shared[0]
 	for slot in 5:
+		if simple and (slot>=2 or ids[slot].is_empty()):continue
 		var anchor:=Node3D.new();anchor.position=Vector3((slot-2)*1.74,.19,7.40);add_child(anchor)
 		var id:String=ids[slot]
 		if id!="":
@@ -36,6 +38,7 @@ func configure(night:Dictionary)->void:
 			var mat:=StandardMaterial3D.new();mat.albedo_color=Color("8b805f");mat.metallic=.3;mat.roughness=.65;mesh.material_override=mat;mesh.scale.y=.32;anchor.add_child(mesh)
 	# Name the three ownership groups once; item order is explained in the build rail.
 	for group in 3:
+		if simple:continue
 		var label:=Label3D.new();label.text=["小柯挂件","同桌共享","泡泡挂件"][group];label.font=FurChapterUITheme.font(false);label.font_size=44;label.pixel_size=.007;label.modulate=Color("fff0cf");label.outline_size=0;label.billboard=BaseMaterial3D.BILLBOARD_ENABLED;label.position=Vector3([-2.61,0.0,2.61][group],.09,8.0);add_child(label)
 	_sync_heat(night)
 

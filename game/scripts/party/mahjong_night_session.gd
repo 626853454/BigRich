@@ -14,6 +14,7 @@ var score_audio:FurMahjongNightAudio
 var use_ai:bool=true
 var elapsed:float=0
 var mode:String="lobby"
+var _receipt_return_mode:String="table"
 var starter:String="windbell"
 var modal:Panel
 var _result_seen:bool=false
@@ -34,8 +35,10 @@ var _frame_state:Dictionary={}
 var _lesson_guidance:bool=true
 var _lesson_guide_toggle:Button
 var _lesson_bests:Dictionary={}
+var welcome:FurMahjongNightWelcomeFlow
 
 func _ready()->void:
+	welcome=FurMahjongNightWelcomeFlow.new(self)
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	audio=FurPartyBoardAudio.new();add_child(audio)
 	score_audio=FurMahjongNightAudio.new();add_child(score_audio)
@@ -68,9 +71,25 @@ func _relic_card(id:String,callback:Callable,dimensions:Vector2,selected:bool=fa
 	var title:=Label.new();title.text=Catalog.name_of(id);title.position=Vector2(97,15);title.size=Vector2(dimensions.x-111,30);title.add_theme_font_size_override("font_size",20);title.add_theme_color_override("font_color",Color("fff0cf") if selected else Color("254448"));title.mouse_filter=Control.MOUSE_FILTER_IGNORE;b.add_child(title)
 	var price:=Label.new();price.text=("%d 金币"%Catalog.ITEMS[id].price) if show_price else Catalog.ITEMS[id].route+" · 起步";price.position=Vector2(99,50);price.size=Vector2(dimensions.x-113,25);price.add_theme_font_size_override("font_size",17);price.add_theme_color_override("font_color",Color("f2d49c") if selected else Color("775c3a"));price.mouse_filter=Control.MOUSE_FILTER_IGNORE;b.add_child(price)
 	var detail:=Label.new();detail.text=Catalog.SHORTS[id];detail.position=Vector2(18,101);detail.size=Vector2(dimensions.x-36,dimensions.y-116);detail.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;detail.add_theme_font_size_override("font_size",17);detail.add_theme_color_override("font_color",Color("f8eed7") if selected else Color("254448"));detail.mouse_filter=Control.MOUSE_FILTER_IGNORE;b.add_child(detail)
+	detail.name="RelicDetail"
 	return b
 
 func _lobby()->void:
+	presenter.set_menu_mode(true)
+	welcome.active=false;mode="lobby";presenter._offer_panel.hide();_lesson_reset.hide();_lesson_guide_toggle.hide()
+	var column:=_new_modal(Rect2(345,148,910,595))
+	_text("百番夜宴",43,column)
+	_text("三张牌，亮一组。小小的帮手，会把它变成大大的连响。",24,column)
+	_text("第一次来，先亲手打一组；想慢慢玩，就从三段小关养起。",20,column)
+	column.add_child(_button("第一次玩 · 跟着亮一组",func():welcome.start("tutorial"),Vector2(858,91),"primary"))
+	column.add_child(_button("午后小桌 · 三小关慢慢养成",func():welcome.start("small"),Vector2(858,85)))
+	_text("教学与小关是单人预设练习，可以重试，没有倒计时。",17,column)
+	column.add_child(_button("完整夜宴 · 随机三桌 / 本地双人 / 进阶练招",_advanced_lobby,Vector2(858,62)))
+	_text("空格跳过计分 · F1 查看帮助 · 音画设置随时可用",16,column)
+
+func _advanced_lobby()->void:
+	presenter.set_menu_mode(true)
+	welcome.active=false
 	mode="lobby";presenter._offer_panel.hide();_lesson_reset.hide();_lesson_guide_toggle.hide()
 	var column:=_new_modal(Rect2(248,73,1104,750) if _replay_seed>=0 else Rect2(248,104,1104,664))
 	_text("百番夜宴",43,column)
@@ -79,7 +98,7 @@ func _lobby()->void:
 	var row:=HBoxContainer.new();row.add_theme_constant_override("separation",14);column.add_child(row)
 	for id:String in Catalog.STARTERS:
 		var chosen:String=id;var item:Dictionary=Catalog.ITEMS[id]
-		var b:=_relic_card(id,func():starter=chosen;_lobby(),Vector2(337,168),starter==id,false);row.add_child(b)
+		var b:=_relic_card(id,func():starter=chosen;_advanced_lobby(),Vector2(337,168),starter==id,false);row.add_child(b)
 	_text("泡泡从「回甘双杯」起步：你换出到河牌的牌，能成为它的接力得分。",17,column)
 	var buttons:=HBoxContainer.new();buttons.add_theme_constant_override("separation",14);column.add_child(buttons)
 	buttons.add_child(_button("1人 + 泡泡AI · "+("复盘开宴" if _replay_seed>=0 else "随机开宴"),func():_start_run(true),Vector2(510,64),"primary"))
@@ -91,10 +110,15 @@ func _lobby()->void:
 	_text("F1 查看玩法 · 空格跳过计分 · 顶部可切换演出节奏",16,column)
 
 func _start_run(ai:bool)->void:
+	welcome.active=false
 	_lesson_id="";_lesson_reset.hide();use_ai=ai;journey.start(_replay_seed if _replay_seed>=0 else int(randi()%2147483646)+1,starter,ai);_begin_table()
 func _begin_table()->void:
+	presenter.set_menu_mode(false)
+	presenter.opening_drawer=""
 	if is_instance_valid(modal):remove_child(modal);modal.queue_free();modal=null
-	rules=Rules.new();rules.begin_night(journey.table_config());mode="table";_result_seen=false;elapsed=0;_ai_waiting_hu=false;_ai_declined_this_turn=false
+	if welcome.active:rules=welcome.make_rules()
+	else:rules=Rules.new();rules.begin_night(journey.table_config())
+	mode="table";_result_seen=false;elapsed=0;_ai_waiting_hu=false;_ai_declined_this_turn=false
 	if not _lesson_id.is_empty():Lessons.setup(rules,_lesson_id)
 	if not _lesson_id.is_empty():rules._s.night.lesson.guided=_lesson_guidance
 	_lesson_hint_revision=-1;_lesson_reset.visible=not _lesson_id.is_empty()
@@ -116,6 +140,7 @@ func _process(delta:float)->void:
 	_lesson_reset.disabled=presenter.is_busy();_lesson_guide_toggle.disabled=presenter.is_busy()
 	if presenter.is_busy():return
 	var state:Dictionary=_frame_state
+	if welcome.active:welcome.tick(state);return
 	_lesson_reset.disabled=false
 	_lesson_guide_toggle.disabled=false
 	if not _lesson_id.is_empty():
@@ -170,8 +195,14 @@ func _process(delta:float)->void:
 				else:_command("discard",rules.ai_discard(),1,state.revision)
 
 func _command(kind:String,value:Variant,actor:int,revision:int)->void:
+	if welcome.active:
+		if presenter.is_busy():return
+		if kind=="leave":welcome.active=false;_lobby();return
+		if kind=="settings":_show_av_settings();return
+		if kind!="action" or mode!="table":return
 	if kind=="leave" and not _lesson_id.is_empty() and not presenter.is_busy():_lesson_id="";_lobby();return
 	if kind=="review_result" and mode=="review":_show_table_result(false);return
+	if kind=="score_receipt" and mode in ["table","review"]:FurMahjongNightReceipt.show_detail(self);return
 	if kind=="leave" and mode in ["table","review"] and not presenter.is_busy():get_tree().change_scene_to_file("res://scenes/party/adventure.tscn");return
 	if mode!="table" or presenter.is_busy():return
 	if kind=="settings":_show_av_settings();return
@@ -180,6 +211,7 @@ func _command(kind:String,value:Variant,actor:int,revision:int)->void:
 	if kind=="trick_picker":_show_trick_picker(int(value),actor,revision);return
 	if kind=="reshape_picker":_show_reshape_picker(actor,revision);return
 	if kind=="river_picker":_show_river_picker(actor,revision);return
+	if kind=="first_move":FurMahjongNightFirstMove.show_help(self,actor,revision);return
 	if kind=="action_picker":_show_action_picker(actor,revision);return
 	var reply:Dictionary={"ok":false,"reason":"unknown_command"}
 	match kind:
@@ -351,6 +383,7 @@ func _result_receipt(memory:Dictionary,parent:Node,result:Dictionary)->void:
 func _open_shop()->void:
 	mode="shop";_shop_actor=0;_selected_heirloom=-1;_notice="买挂件，或用4币定向升级基础筹码；留下关键实体牌。";_shop()
 func _shop()->void:
+	mode="shop"
 	var actor:int=_shop_actor;var data:Dictionary=journey.data
 	if data.build.techniques[actor].is_empty():_show_technique_draft(actor);return
 	if actor==0 and journey.next_table() in [2,3] and not data.venue_confirmed.get(str(journey.next_table()),false):_show_venue_draft();return
@@ -367,7 +400,9 @@ func _shop()->void:
 	var products:=HBoxContainer.new();products.add_theme_constant_override("separation",10);column.add_child(products)
 	for id:String in data.shops:
 		var chosen:String=id;var item:Dictionary=Catalog.ITEMS[id]
-		var b:=_relic_card(id,func():_buy_relic(chosen,actor,0 if item.shared else _replacement),Vector2(230,182))
+		var b:=_relic_card(id,func():FurMahjongNightShopInsight.show_item(self,chosen,actor,0 if item.shared else _replacement),Vector2(230,182))
+		var insight:Dictionary=FurMahjongNightShopInsight.describe(data,id,actor,0 if item.shared else _replacement)
+		var detail:Label=b.get_node("RelicDetail");detail.text=insight.badge+"\n"+Catalog.SHORTS[id];detail.add_theme_font_size_override("font_size",14)
 		var comparison:Dictionary=journey.preview_purchase(id,actor,0 if item.shared else _replacement)
 		var comparison_text:String=Catalog.name_of(id)+" · "+comparison.text
 		b.tooltip_text+="\n\n"+comparison_text
@@ -383,7 +418,8 @@ func _shop()->void:
 		var upgrade:=_button("%s %d→%d级 · 4币\n基础筹码 +25"%[{"chi":"顺","pon":"刻","kong":"杠"}[kind],data.build.levels[actor][kind],data.build.levels[actor][kind]+1],func():_upgrade_type(k,actor),Vector2(386,62));upgrade.disabled=data.coins[actor]<4;upgrades.add_child(upgrade)
 	var pack_row:=HBoxContainer.new();pack_row.add_theme_constant_override("separation",10);column.add_child(pack_row)
 	var planned:int=data.planned_requests[actor]
-	var pack_text:=_text("行囊 %d / %d · 下桌保证入手\n"%[data.build.keepsakes[actor].size(),data.build.carry_slots[actor]]+("约好缺 "+ChapterMahjongTable.tile_name(planned*4) if planned>=0 else "可带两张，请伙伴留第三张"),16,pack_row);pack_text.custom_minimum_size.x=425
+	var pack_hint:String={1:"先留1张关键牌；扩容后可带组合",2:"可带两张，请伙伴留第三张",3:"可保留一整组，或带不同缺张"}.get(int(data.build.carry_slots[actor]),"选择本桌实际拥有的牌")
+	var pack_text:=_text("行囊 %d / %d · 下桌保证入手\n"%[data.build.keepsakes[actor].size(),data.build.carry_slots[actor]]+("约好缺 "+ChapterMahjongTable.tile_name(planned*4) if planned>=0 else pack_hint),16,pack_row);pack_text.custom_minimum_size.x=425
 	var expand:=_button("3币 · 增1格（最多3）",func():_notice="行囊扩容，可带完整组合" if journey.pack_slot(actor) else "行囊已满或金币不足";_shop(),Vector2(245,44));expand.disabled=data.build.carry_slots[actor]>=3 or data.coins[actor]<3;pack_row.add_child(expand)
 	pack_row.add_child(_button("装入推荐组合",func():journey.use_recommended_keepsakes(actor);_notice="按现有牌、刻印和路线选出组合，可手动调整";_shop(),Vector2(245,44)))
 	pack_row.add_child(_button("约好下一手",func():_show_carry_plan(actor),Vector2(245,44),"primary" if planned>=0 else "ivory"))
@@ -473,11 +509,16 @@ func _show_carry_plan(actor:int)->void:
 	column.add_child(_button("返回夜市 · 继续准备",_shop,Vector2(962,58),"primary"))
 func _unhandled_key_input(event:InputEvent)->void:
 	if event is InputEventKey and event.pressed and not event.echo:
-		if event.physical_keycode==KEY_ESCAPE and mode in ["reshape_picker","river_picker"]:_close_reshape_picker()
+		if event.physical_keycode==KEY_ESCAPE and mode in ["reshape_picker","river_picker","first_move"]:_close_reshape_picker()
+		if event.physical_keycode==KEY_ESCAPE and mode=="shop_detail":_shop()
+		if event.physical_keycode==KEY_ESCAPE and mode=="score_receipt":_close_score_receipt()
+		if event.physical_keycode==KEY_ESCAPE and mode=="welcome_complements":welcome.show_result()
+		if event.physical_keycode==KEY_ESCAPE and mode=="table_tools":_close_trick_picker()
 		elif event.physical_keycode==KEY_SPACE:presenter.skip_score()
 		elif event.physical_keycode==KEY_F1 and mode in ["lobby","table","review"]:_show_help()
 
 func _show_help()->void:
+	if welcome.active:welcome.help();return
 	var previous:String=mode;mode="help"
 	var column:=_new_modal(Rect2(242,70,1116,760))
 	_text("把一副牌，玩成一场连锁",32,column)
@@ -545,6 +586,9 @@ func _close_trick_picker()->void:
 	if is_instance_valid(modal):remove_child(modal);modal.queue_free();modal=null
 	mode="table";elapsed=0
 
+func _close_score_receipt()->void:
+	_close_trick_picker();mode=_receipt_return_mode
+
 func _finish_trick(id:String,index:int,target:int,actor:int,revision:int)->void:
 	_close_trick_picker();_command("trick",[id,index,target],actor,revision)
 
@@ -554,6 +598,7 @@ func _tile_list(ids:Array)->String:
 	return " · ".join(names)
 
 func _select_reshape_meld(index:int,actor:int,revision:int)->void:
+	if welcome.active:return
 	if mode!="table" or presenter.is_busy():return
 	_show_reshape_picker(actor,revision,index)
 
@@ -773,7 +818,8 @@ func _show_table_tools(actor:int,revision:int)->void:
 	var rect:=Rect2(360,112,880,650) if has_skill else Rect2(360,149,880,590)
 	if show_advice:rect.position.y-=24;rect.size.y+=48
 	mode="table_tools";var column:=_new_modal(rect)
-	_text("同桌协作 · 为下一手铺路",32,column)
+	var reached:bool=s.night.bank_preview>=s.night.target
+	_text("已经达标 · 接下来由你们决定" if reached else "同桌协作 · 为下一手铺路",32,column)
 	var delivery:int=s.night.deliveries[actor]
 	_text(("伙伴递来的 "+ChapterMahjongTable.tile_name(delivery)+" 已在河中，请回桌交换。" if delivery in s.tea.tray else "要牌会公开给伙伴；冲泡会改变公共河牌，两人都能利用。"),19,column)
 	var row:=HBoxContainer.new();row.add_theme_constant_override("separation",12);column.add_child(row)
@@ -788,12 +834,15 @@ func _show_table_tools(actor:int,revision:int)->void:
 	for slot in int(s.night.revealed):
 		var i:int=slot
 		var b:=_button(ChapterMahjongTable.tile_name(s.tea.tray[slot])+"\n冲泡换掉",func():_from_tools("refresh_river",i,actor,revision),Vector2(154,76));b.disabled=s.night.refresh_used or s.tea.charge<2;river.add_child(b)
-	_text("收桌预计 %s / 目标 %s。达标后可提议结束，伙伴同意才收桌；剩余摸牌机会会放弃。"%[presenter._number(s.night.bank_preview),presenter._number(s.night.target)],19,column)
+	var bank_note:Label=_text("收桌预计 %s / 目标 %s。达标后可提议结束，伙伴同意才收桌；剩余摸牌机会会放弃。"%[presenter._number(s.night.bank_preview),presenter._number(s.night.target)],19,column)
 	var endings:=HBoxContainer.new();endings.add_theme_constant_override("separation",12);column.add_child(endings)
 	var bank:=_button("提议收桌 · 先问伙伴",func():_from_tools("cash_request",null,actor,revision),Vector2(402,76),"primary");bank.disabled=s.night.bank_preview<s.night.target;endings.add_child(bank)
 	var extra:=_button("邀伙伴加演 · 目标%d\n成功各+4币，失败掉1耐力"%rules.encore_target(),func():_from_tools("encore_request",null,actor,revision),Vector2(410,76));extra.disabled=not rules.can_invite_encore();extra.add_theme_font_size_override("font_size",16);endings.add_child(extra)
 	extra.tooltip_text="仅前两桌，提前达标但尚未达到1.6倍目标时可邀请。每桌只邀一次，双方同意后不能撤回；失败按新目标结算。" if not s.night.encore.asked else ("本桌已经加演，按新目标结算。" if s.night.encore.active else "本桌伙伴已婉拒加演。")
-	if show_advice:_text("泡泡："+rules.encore_advice().text,17,column)
+	if reached:column.move_child(bank_note,1);column.move_child(endings,2)
+	if show_advice:
+		var advice:Label=_text("泡泡："+rules.encore_advice().text,17,column)
+		if reached:column.move_child(advice,3)
 	column.add_child(_button("返回 · 继续做这一手",_close_trick_picker,Vector2(824,58)))
 
 func _from_tools(kind:String,value:Variant,actor:int,revision:int)->void:

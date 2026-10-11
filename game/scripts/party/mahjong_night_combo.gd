@@ -9,6 +9,7 @@ var _pillars:Array[Panel]=[]
 var _values:Array[Label]=[]
 var _signs:Array[Label]=[]
 var _previous:Array=[]
+var simple_mode:bool=false
 
 func _ready()->void:
 	position=Vector2(180,573);size=Vector2(914,127);mouse_filter=Control.MOUSE_FILTER_IGNORE
@@ -57,6 +58,7 @@ func present(row:Dictionary)->void:
 	elif row.get("op","")=="heat":
 		_show_numbers(false);_formula.add_theme_font_size_override("font_size",25)
 		_formula.text="重算兑现！炉温归零 · 再攒下一次爆发" if row.get("spent",false) else ("炉温 2/2  ·  下一组顺 / 刻再计一次！" if int(row.value)==2 else "炉温 1/2  ·  再碰一次，或花1灵感添火")
+		if simple_mode and int(row.value)==1:_formula.text="炉温 1/2 · 再亮一组刻子，就蓄满了"
 	elif row.get("op","")=="paid":
 		_show_numbers(false);_formula.text="%d − 已记 %d = 新增 %d 分"%[total+int(row.value),int(row.value),total];_formula.add_theme_font_size_override("font_size",26)
 	elif row.get("op","")=="locked":_show_numbers(false);_formula.text="倍率仍被封住 · 先完成桌面合作条件";_formula.add_theme_font_size_override("font_size",23)
@@ -75,6 +77,11 @@ func duo(pair:Dictionary,actor:String)->void:
 	if is_instance_valid(_beat):_beat.kill()
 	_formula.pivot_offset=Vector2(300,24);_formula.scale=Vector2.ONE*1.09
 	_beat=create_tween();_beat.tween_property(_formula,"scale",Vector2.ONE,.28).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+
+func welcome_gain(amount:int,base:int)->void:
+	gain(amount,"chi","小柯")
+	_source.text="这组牌 %d → %d 分 · 帮手多赚 %d"%[base,amount,maxi(0,amount-base)] if amount>base else "第一笔分数 · 三张牌，真的亮出来了"
+	if amount>=base*2:_formula.text="连响！  +%d 分"%amount
 
 func reset()->void:
 	if is_instance_valid(_beat):_beat.kill()

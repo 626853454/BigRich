@@ -1,0 +1,23 @@
+{
+  "source": "Original deterministic modal/additive synthesis. No external samples; measurements do not constitute human hearing approval.",
+  "assets": [
+    {
+      "name": "build_wind_finish",
+      "seconds": 0.88,
+      "peak": 0.45276137968097857,
+      "rms": 0.10153460937289158
+    },
+    {
+      "name": "build_fire_first",
+      "seconds": 0.43,
+      "peak": 0.34282820008202786,
+      "rms": 0.08183397998422878
+    },
+    {
+      "name": "build_fire_finish",
+      "seconds": 0.76,
+      "peak": 0.4330724581592949,
+      "rms": 0.1027646438005284
+    }
+  ]
+}

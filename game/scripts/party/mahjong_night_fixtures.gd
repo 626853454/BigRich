@@ -18,6 +18,8 @@ func _label(parent:Node3D,text:String,position_value:Vector3)->Label3D:
 	label.billboard=BaseMaterial3D.BILLBOARD_ENABLED;label.position=position_value;parent.add_child(label);_labels.append(label);return label
 
 func configure(n:Dictionary)->void:
+	visible=not n.has("welcome")
+	if not visible:return
 	if _table!=int(n.table) or _venue!=n.get("venue",""):
 		if is_instance_valid(_motion):_motion.kill()
 		for node in get_children():remove_child(node);node.queue_free()

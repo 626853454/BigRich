@@ -19,3 +19,8 @@
 make_reshape_audio.py独立生成reshape_open/reshape_land；make_chain_audio.py独立生成chain_land。确定性瓷音模态与滤波噪声，无外部采样。旧26短音＋2音乐保留，合计29短音＋2音乐。
 录音只来自自身Godot Master总线，不使用麦克风或系统输入。波形/轨道验证不等于人类听感认证。
 原有社区角色来源及商业许可不确定性保持，未新增下载资产。用户已认可角色/头像/柯基和旧交付不改。
+
+本轮新增 / 2026-10-12 新手小桌与构筑爆响
+make_welcome_build_audio.py生成build_wind_finish、build_fire_first、build_fire_finish三个原创合成短音；无外部采样，参数见welcome-build-audio-source.json。旧29短音与2音乐保留，累计32短音与2音乐。
+同三张真实物理牌的桌前齐奏/精确归位、两响动作与计分反馈为程序驱动已有模型和骨骼，不是新增角色模型。8份Blender编辑源为继承源。基础角色商业许可不确定性保持。
+录音只来自自身Godot Master，不使用麦克风或系统音频；工程通过不表示人类乐趣或听感认可。

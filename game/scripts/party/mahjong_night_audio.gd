@@ -19,7 +19,7 @@ var music_volume:float=.8
 var effects_volume:float=1.0
 
 func _ready()->void:
-	for id:String in KINDS+["reshape_open","reshape_land","chain_land"]:_streams[id]=load(ROOT+id+".wav")
+	for id:String in KINDS+["reshape_open","reshape_land","chain_land","build_wind_finish","build_fire_first","build_fire_finish"]:_streams[id]=load(ROOT+id+".wav")
 	for i in 6:
 		var player:=AudioStreamPlayer.new();player.max_polyphony=1;add_child(player);_voices.append(player);_started.append(-1);_priorities.append(0)
 	for id:String in ["music_calm","music_groove"]:
@@ -40,7 +40,9 @@ func cue(kind:String,pitch:float=1.0)->void:
 	if _closed or not enabled or not _streams.has(kind):return
 	var now:int=Time.get_ticks_msec()
 	if now-int(_last.get(kind,-10000))<(80 if kind in ["hu","overkill","lamp"] else 35):return
-	var priority:int=3 if kind in ["hu","overkill","lamp","encore_clear","breakthrough"] else (2 if kind in ["group_land","charge","total","reveal","encore_accept","chain_land"] else 1)
+	var finish:bool=kind in ["build_wind_finish","build_fire_finish"]
+	var first_hit:bool=kind=="build_fire_first"
+	var priority:int=3 if finish or kind in ["hu","overkill","lamp","encore_clear","breakthrough"] else (2 if first_hit or kind in ["group_land","charge","total","reveal","encore_accept","chain_land"] else 1)
 	var slot:int=-1;var oldest:int=9223372036854775807
 	for i in _voices.size():
 		if not _voices[i].playing:slot=i;break
@@ -49,12 +51,16 @@ func cue(kind:String,pitch:float=1.0)->void:
 	_last[kind]=now;_started[slot]=now;_priorities[slot]=priority
 	var player:AudioStreamPlayer=_voices[slot];player.stop();player.stream=_streams[kind];player.pitch_scale=pitch
 	player.volume_db=-10 if priority==3 else (-13 if priority==2 else -17)
+	if finish:player.volume_db=-12
+	elif first_hit:player.volume_db=-15
 	if kind=="select":player.volume_db=-21
 	player.volume_db+=linear_to_db(maxf(.0001,effects_volume))
 	if kind in ["hu","overkill","lamp","group_land","chain_land","encore_clear","encore_accept","breakthrough"]:_duck=maxf(_duck,.9 if priority==3 else .24)
+	if finish or first_hit:_duck=maxf(_duck,.72 if finish else .30)
 	player.play();sounded.emit(kind,Time.get_ticks_usec(),pitch,player.volume_db)
 
 func beat(operation:String,step:int)->void:
+	if operation.begins_with("build_"):cue(operation);return
 	if ":" in operation:
 		var route:String=operation.get_slice(":",0)
 		cue({"连顺":"wind_score","爆杠":"coal_score","接力":"relay_score"}.get(route,"multiply"),pow(2.0,float([0,2,3,5,7][mini(step,4)])/12.0));return
